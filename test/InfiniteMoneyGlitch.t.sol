@@ -17,6 +17,7 @@ contract RejectCallsFixture {
     }
 }
 
+/// forge-config: default.fuzz.runs = 1000
 contract InfiniteMoneyGlitchTest is Test {
     uint256 private constant SUPPLY = 1_000_000_000 * 10 ** 18;
     address private constant ALICE = address(0xA11CE);
@@ -380,7 +381,7 @@ contract InfiniteMoneyGlitchTest is Test {
     }
 
     function testFuzz_unapprovedSpenderCannotMoveTokens(address spender, uint256 amount) public {
-        vm.assume(spender != address(0));
+        spender = address(uint160(bound(uint160(spender), 1, type(uint160).max)));
         amount = bound(amount, 1, SUPPLY);
         vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, spender, 0, amount));
         vm.prank(spender);
